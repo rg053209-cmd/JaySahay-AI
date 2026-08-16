@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard — JanSahay AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: var(--off-white); }
+  /* ── SIDEBAR ── */
+  .db-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+    padding-top: 68px;
+  }
+  .db-sidebar {
+    background: linear-gradient(160deg, var(--navy) 0%, #0D47A1 60%, #1B5E20 100%);
+    padding: 28px 20px;
+    position: sticky;
+    top: 68px;
+    height: calc(100vh - 68px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .sidebar-profile {
+    text-align: center;
+    padding: 20px 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 8px;
+  }
+  .sidebar-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FFD54F, #FF8F00);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 12px;
+    box-shadow: 0 6px 20px rgba(255,179,0,0.4);
+    border: 3px solid rgba(255,255,255,0.2);
+  }
+  .sidebar-name {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 1rem; color: white;
+    margin-bottom: 4px;
+  }
+  .sidebar-email {
+    font-size: 0.72rem; color: rgba(255,255,255,0.55);
+    margin-bottom: 12px;
+    word-break: break-all;
+  }
+  .sidebar-country {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 100px;
+    font-size: 0.72rem; color: rgba(255,255,255,0.85);
+    font-weight: 600; margin-bottom: 14px;
+  }
+  .sidebar-completion {
+    margin-top: 4px;
+  }
+  .sidebar-completion-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.68rem; color: rgba(255,255,255,0.55);
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .sidebar-completion-bar {
+    height: 6px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 3px; overflow: hidden;
+  }
+  .sidebar-completion-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #FFD54F, #FF8F00);
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+  /* SIDEBAR STATS */
+  .sidebar-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 8px;
+  }
+  .sidebar-stat {
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-stat-num {
+    font-family: var(--font-display);
+    font-size: 1.4rem; font-weight: 800;
+    color: white; line-height: 1;
+    display: block;
+  }
+  .sidebar-stat-label {
+    font-size: 0.62rem; color: rgba(255,255,255,0.5);
+    margin-top: 4px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    display: block;
+  }
+  /* SIDEBAR NAV */
+  .sidebar-nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: rgba(255,255,255,0.7);
+    font-family: var(--font-display);
+    font-size: 0.88rem; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    border: none; background: none; width: 100%;
+    text-align: left;
+  }
+  .sidebar-nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+  .sidebar-nav-item.active { background: rgba(255,255,255,0.15); color: white; }
+  .sidebar-nav-item .nav-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* ── MAIN CONTENT ── */
+  .db-main {
+    padding: 32px;
+    overflow-y: auto;
+  }
+  .db-welcome {
+    background: linear-gradient(135deg, var(--navy) 0%, #0D47A1 60%, #1B5E20 100%);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    color: white;
+    position: relative; overflow: hidden;
+  }
+  .db-welcome::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .db-welcome-inner { position: relative; z-index: 1; }
+  .db-welcome h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.4rem, 2.5vw, 2rem);
+    font-weight: 800; color: white; margin-bottom: 8px;
+  }
+  .db-welcome p {
+    font-size: 0.9rem; color: rgba(255,255,255,0.75); line-height: 1.6;
+    max-width: 540px;
+  }
+  /* QUICK ACTIONS */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .quick-action {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    border: 1px solid var(--gray-100);
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    text-decoration: none;
+    color: var(--gray-800);
+    transition: all 0.3s;
+    cursor: pointer;
+    display: block;
+  }
+  .quick-action:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+  }
+  .qa-icon {
+    font-size: 2rem; margin-bottom: 10px; display: block;
+  }
+  .qa-title {
+    font-family: var(--font-display);
+    font-size: 0.88rem; font-weight: 700;
+    color: var(--navy); margin-bottom: 4px;
+  }
+  .qa-desc {
+    font-size: 0.72rem; color: var(--gray-400); line-height: 1.4;
+  }
+  /* SECTIONS */
+  .db-section-title {
+    font-family: var(--font-display);
+    font-size: 1rem; font-weight: 800;
+    color: var(--navy);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .db-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+  .db-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--gray-100);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+  }
+  /* AI Recommended scheme */
+  .ai-rec-card {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px;
+    background: var(--gray-50);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--gray-100);
+    transition: all 0.2s;
+  }
+  .ai-rec-card:hover { box-shadow: var(--shadow-sm); background: white; }
+  .ai-rec-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .ai-rec-info { flex: 1; }
+  .ai-rec-name {
+    font-family: var(--font-display); font-size: 0.88rem;
+    font-weight: 700; color: var(--navy);
+  }
+  .ai-rec-match {
+    font-size: 0.72rem; color: var(--green);
+    font-weight: 600; margin-top: 2px;
+  }
+  .ai-rec-pct {
+    font-family: var(--font-display); font-size: 0.88rem;
+    font-weight: 800; color: var(--blue);
+    flex-shrink: 0;
+  }
+  /* SAVED SCHEME */
+  .db-saved-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: white;
+    border: 1px solid var(--gray-100);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+  .db-saved-item:hover { box-shadow: var(--shadow-md); }
+  /* APP TRACKER */
+  .tracker-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+  /* REMINDER ITEM */
+  .reminder-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--gray-100);
+  }
+  /* RESPONSIVE */
+  @media (max-width: 1024px) {
+    .db-layout { grid-template-columns: 1fr; }
+    .db-sidebar {
+      position: relative; top: auto; height: auto;
+      padding: 20px 16px;
+      flex-direction: row; flex-wrap: wrap;
+    }
+    .sidebar-profile { width: 100%; padding: 16px; }
+    .sidebar-stats { width: 100%; }
+  }
+  @media (max-width: 768px) {
+    .db-main { padding: 16px; }
+    .db-grid { grid-template-columns: 1fr; }
+    .quick-actions { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .quick-actions { grid-template-columns: 1fr 1fr; }
+    .db-layout { padding-top: 68px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Announce Bar -->
+<div class="announce-bar">
+  🇮🇳 <span>JanSahay AI — Your Citizen Dashboard</span> · <a href="index.html">← Back to Home</a>
+</div>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo">🤖</div>
+    <div>
+      <div class="nav-title">JanSahay AI</div>
+      <div class="nav-subtitle">जन सहाय</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">🏠 Home</a></li>
+    <li><a href="finder.html">🔍 Find Scheme</a></li>
+    <li><a href="index.html#schemes">📋 Schemes</a></li>
+    <li><a href="index.html#assistant">💬 AI Chat</a></li>
+    <li><a href="form-assistant.html">📝 Form Assistant</a></li>
+  </ul>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div class="nav-auth" id="authWrapper">
+      <a href="login.html" id="authBtn" class="nav-btn">Login / Signup</a>
+      <div id="authDropdown" class="dropdown hidden">
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+    <div class="hamburger" onclick="toggleMobileMenu()" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="toggleMobileMenu()">✕</button>
+  <a href="index.html" onclick="toggleMobileMenu()">🏠 Home</a>
+  <a href="finder.html" onclick="toggleMobileMenu()">🔍 Find My Scheme</a>
+  <a href="index.html#schemes" onclick="toggleMobileMenu()">📋 Schemes</a>
+  <a href="index.html#assistant" onclick="toggleMobileMenu()">💬 AI Chat</a>
+  <a href="form-assistant.html" onclick="toggleMobileMenu()">📝 Form Assistant</a>
+  <a href="#" id="mobileLogout" onclick="logout(); toggleMobileMenu()" style="display:none;">🚪 Logout</a>
+</div>
+
+<!-- Dashboard Layout -->
+<div class="db-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="db-sidebar">
+
+    <!-- Profile -->
+    <div class="sidebar-profile">
+      <div class="sidebar-avatar" id="sidebarAvatar">👤</div>
+      <div class="sidebar-name" id="sidebarName">Welcome!</div>
+      <div class="sidebar-email" id="sidebarEmail">Not logged in</div>
+      <div class="sidebar-country">🇮🇳 India</div>
+      <div class="sidebar-completion">
+        <div class="sidebar-completion-label">
+          <span>Profile Completion</span>
+          <span id="sidebarPct">0%</span>
+        </div>
+        <div class="sidebar-completion-bar">
+          <div class="sidebar-completion-fill" id="sidebarPctBar" style="width:0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="sidebar-stats">
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-num" id="statSaved">0</span>
+        <span class="sidebar-stat-label">Saved</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-num" id="statApplied">0</span>
+        <span class="sidebar-stat-label">Applied</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-num" id="statApproved">0</span>
+        <span class="sidebar-stat-label">Approved</span>
+      </div>
+      <div class="sidebar-stat">
+        <span class="sidebar-stat-num" id="statEligible">22+</span>
+        <span class="sidebar-stat-label">Eligible</span>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div style="font-size:0.65rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.06em;padding:4px 14px 8px;">NAVIGATION</div>
+    <a href="index.html" class="sidebar-nav-item">
+      <span class="nav-icon">🏠</span> Home
+    </a>
+    <button class="sidebar-nav-item active" onclick="showSection('overview')">
+      <span class="nav-icon">📊</span> Overview
+    </button>
+    <button class="sidebar-nav-item" onclick="showSection('saved')">
+      <span class="nav-icon">⭐</span> Saved Schemes
+    </button>
+    <button class="sidebar-nav-item" onclick="showSection('tracker')">
+      <span class="nav-icon">📋</span> Application Tracker
+    </button>
+    <button class="sidebar-nav-item" onclick="showSection('reminders')">
+      <span class="nav-icon">⏰</span> Reminders
+    </button>
+    <button class="sidebar-nav-item" onclick="showSection('recs')">
+      <span class="nav-icon">🎯</span> AI Recommendations
+    </button>
+    <a href="finder.html" class="sidebar-nav-item">
+      <span class="nav-icon">🔍</span> Find My Scheme
+    </a>
+    <a href="form-assistant.html" class="sidebar-nav-item">
+      <span class="nav-icon">📝</span> Form Assistant
+    </a>
+    <a href="index.html#schemes" class="sidebar-nav-item">
+      <span class="nav-icon">🌐</span> All Schemes
+    </a>
+
+    <!-- Logout -->
+    <div style="margin-top:auto;padding-top:16px;border-top:1px solid rgba(255,255,255,0.08);">
+      <button onclick="logout()" class="sidebar-nav-item" style="color:rgba(255,100,100,0.8);">
+        <span class="nav-icon">🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="db-main">
+
+    <!-- OVERVIEW SECTION -->
+    <div id="section-overview">
+      <!-- Welcome Banner -->
+      <div class="db-welcome">
+        <div class="db-welcome-inner">
+          <h1>👋 Welcome back, <span id="welcomeName">Citizen</span>!</h1>
+          <p>Here's your personalized government scheme dashboard. Track your applications, get AI recommendations, and manage your deadlines — all in one place.</p>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="finder.html" style="padding:10px 22px;background:linear-gradient(135deg,#FFB300,#FF8F00);color:var(--navy);border-radius:10px;font-family:var(--font-display);font-size:0.88rem;font-weight:800;text-decoration:none;transition:all 0.2s;">🔍 Find My Schemes</a>
+            <a href="index.html#assistant" style="padding:10px 22px;background:rgba(255,255,255,0.15);color:white;border-radius:10px;font-family:var(--font-display);font-size:0.88rem;font-weight:700;text-decoration:none;border:1.5px solid rgba(255,255,255,0.25);transition:all 0.2s;">💬 Ask AI Assistant</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="db-section-title">⚡ Quick Actions</div>
+      <div class="quick-actions">
+        <a href="index.html#assistant" class="quick-action">
+          <span class="qa-icon">💬</span>
+          <div class="qa-title">AI Chat</div>
+          <div class="qa-desc">Ask about any government scheme</div>
+        </a>
+        <a href="finder.html" class="quick-action">
+          <span class="qa-icon">🔍</span>
+          <div class="qa-title">Find Schemes</div>
+          <div class="qa-desc">Personalized eligibility check</div>
+        </a>
+        <a href="form-assistant.html" class="quick-action">
+          <span class="qa-icon">📝</span>
+          <div class="qa-title">Fill Form</div>
+          <div class="qa-desc">Auto-fill application forms</div>
+        </a>
+        <div class="quick-action" onclick="showSection('recs')">
+          <span class="qa-icon">🎯</span>
+          <div class="qa-title">AI Predictor</div>
+          <div class="qa-desc">See your scheme match scores</div>
+        </div>
+      </div>
+
+      <!-- 2-Column Grid -->
+      <div class="db-grid">
+
+        <!-- Saved Schemes Summary -->
+        <div class="db-card">
+          <div class="db-section-title">⭐ Saved Schemes</div>
+          <div id="overviewSavedList"></div>
+          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="showSection('saved')" style="padding:8px 18px;background:var(--sky);color:var(--blue);border:none;border-radius:8px;font-family:var(--font-display);font-size:0.8rem;font-weight:700;cursor:pointer;">View All ↗</button>
+            <a href="index.html#schemes" style="padding:8px 18px;background:var(--mint);color:var(--green);border-radius:8px;font-family:var(--font-display);font-size:0.8rem;font-weight:700;text-decoration:none;">Browse Schemes</a>
+          </div>
+        </div>
+
+        <!-- Application Tracker Summary -->
+        <div class="db-card">
+          <div class="db-section-title">📋 Application Status</div>
+          <div id="overviewTrackerList"></div>
+          <button onclick="showSection('tracker')" style="margin-top:12px;padding:8px 18px;background:var(--sky);color:var(--blue);border:none;border-radius:8px;font-family:var(--font-display);font-size:0.8rem;font-weight:700;cursor:pointer;">Track Applications ↗</button>
+        </div>
+
+        <!-- AI Recommended -->
+        <div class="db-card">
+          <div class="db-section-title">🎯 AI Recommendations</div>
+          <div id="overviewRecsList"></div>
+          <button onclick="showSection('recs')" style="margin-top:12px;padding:8px 18px;background:var(--sky);color:var(--blue);border:none;border-radius:8px;font-family:var(--font-display);font-size:0.8rem;font-weight:700;cursor:pointer;">See All Recommendations ↗</button>
+        </div>
+
+        <!-- Upcoming Reminders -->
+        <div class="db-card">
+          <div class="db-section-title">⏰ Upcoming Deadlines</div>
+          <div id="overviewRemindersList"></div>
+          <button onclick="showSection('reminders')" style="margin-top:12px;padding:8px 18px;background:var(--sky);color:var(--blue);border:none;border-radius:8px;font-family:var(--font-display);font-size:0.8rem;font-weight:700;cursor:pointer;">Manage Reminders ↗</button>
+        </div>
+      </div>
+
+      <!-- Nearby Help Center -->
+      <div class="db-card" style="margin-bottom:24px;">
+        <div class="db-section-title">📍 Nearby Help Centers</div>
+        <p style="font-size:0.85rem;color:var(--gray-600);margin-bottom:16px;line-height:1.6;">Find the nearest Common Service Centre (CSC) or government assistance office to apply in person.</p>
+        <button onclick="findNearbyHelp()" style="padding:12px 24px;background:linear-gradient(135deg,var(--green),var(--blue));color:white;border:none;border-radius:10px;font-family:var(--font-display);font-size:0.9rem;font-weight:700;cursor:pointer;margin-bottom:12px;">📍 Find Nearby CSC / Help Center</button>
+        <div id="nearbyMapContainer" style="display:none;border-radius:12px;overflow:hidden;border:1px solid var(--gray-100);margin-top:12px;">
+          <iframe id="nearbyMap" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVED SCHEMES SECTION -->
+    <div id="section-saved" style="display:none;">
+      <div class="db-section-title" style="font-size:1.2rem;">⭐ Saved Schemes</div>
+      <p style="font-size:0.88rem;color:var(--gray-600);margin-bottom:20px;">Schemes you've bookmarked for later reference. Save more from the <a href="index.html#schemes" style="color:var(--blue);">Schemes Explorer</a>.</p>
+      <div class="db-card">
+        <div id="fullSavedList" style="min-height:60px;"></div>
+        <button onclick="promptAddScheme()" style="margin-top:12px;width:100%;padding:10px;border:2px dashed var(--gray-200);border-radius:10px;background:transparent;color:var(--gray-400);font-family:var(--font-display);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-400)'">+ Save a Scheme</button>
+      </div>
+    </div>
+
+    <!-- APPLICATION TRACKER SECTION -->
+    <div id="section-tracker" style="display:none;">
+      <div class="db-section-title" style="font-size:1.2rem;">📋 Application Tracker</div>
+      <p style="font-size:0.88rem;color:var(--gray-600);margin-bottom:20px;">Track your scheme applications and update their status.</p>
+      <div class="db-card">
+        <div id="fullTrackerList" style="min-height:60px;"></div>
+        <button onclick="addApplicationTracker()" style="margin-top:12px;width:100%;padding:10px;border:2px dashed var(--gray-200);border-radius:10px;background:transparent;color:var(--gray-400);font-family:var(--font-display);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-400)'">+ Track New Application</button>
+      </div>
+    </div>
+
+    <!-- REMINDERS SECTION -->
+    <div id="section-reminders" style="display:none;">
+      <div class="db-section-title" style="font-size:1.2rem;">⏰ Deadline Reminders</div>
+      <p style="font-size:0.88rem;color:var(--gray-600);margin-bottom:20px;">Set reminders for important scheme deadlines so you never miss out.</p>
+      <div class="db-card">
+        <div id="fullRemindersList" style="min-height:60px;"></div>
+        <button onclick="addReminder()" style="margin-top:12px;width:100%;padding:10px;border:2px dashed var(--gray-200);border-radius:10px;background:transparent;color:var(--gray-400);font-family:var(--font-display);font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.borderColor='var(--saffron)';this.style.color='var(--saffron)'" onmouseout="this.style.borderColor='var(--gray-200)';this.style.color='var(--gray-400)'">+ Add Reminder</button>
+      </div>
+    </div>
+
+    <!-- AI RECOMMENDATIONS SECTION -->
+    <div id="section-recs" style="display:none;">
+      <div class="db-section-title" style="font-size:1.2rem;">🎯 AI Scheme Recommendations</div>
+      <p style="font-size:0.88rem;color:var(--gray-600);margin-bottom:20px;">Based on your profile, here are the schemes you have the highest chance of being approved for.</p>
+
+      <!-- Profile Quick Setup -->
+      <div class="db-card" style="margin-bottom:20px;background:linear-gradient(135deg,var(--navy) 0%,#0D47A1 60%,#1B5E20 100%);border:none;color:white;">
+        <div style="font-family:var(--font-display);font-size:1rem;font-weight:800;margin-bottom:12px;color:white;">🎛️ Refine Your Profile for Better Recommendations</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px;">
+          <select id="recState" onchange="loadAIRecs()" style="padding:9px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.82rem;cursor:pointer;outline:none;">
+            <option value="">📍 Select State</option>
+            <option value="maharashtra">Maharashtra</option>
+            <option value="up">Uttar Pradesh</option>
+            <option value="mp">Madhya Pradesh</option>
+            <option value="karnataka">Karnataka</option>
+            <option value="andhra">Andhra Pradesh</option>
+            <option value="tamilnadu">Tamil Nadu</option>
+            <option value="westbengal">West Bengal</option>
+            <option value="odisha">Odisha</option>
+            <option value="delhi">Delhi</option>
+            <option value="other">Other State</option>
+          </select>
+          <select id="recOcc" onchange="loadAIRecs()" style="padding:9px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.82rem;cursor:pointer;outline:none;">
+            <option value="">💼 Occupation</option>
+            <option value="farmer">Farmer / Kisan</option>
+            <option value="student">Student</option>
+            <option value="woman">Homemaker</option>
+            <option value="business">Business / MSME</option>
+            <option value="labour">Daily Labour</option>
+            <option value="unemployed">Unemployed</option>
+            <option value="government">Govt Employee</option>
+          </select>
+          <select id="recIncome" onchange="loadAIRecs()" style="padding:9px 12px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);color:white;font-size:0.82rem;cursor:pointer;outline:none;">
+            <option value="">💰 Income Range</option>
+            <option value="below1L">Below ₹1 Lakh</option>
+            <option value="1L-2.5L">₹1L – ₹2.5L</option>
+            <option value="2.5L-5L">₹2.5L – ₹5L</option>
+            <option value="5L-10L">₹5L – ₹10L</option>
+            <option value="above10L">Above ₹10L</option>
+          </select>
+        </div>
+        <button onclick="loadAIRecs()" style="padding:10px 24px;background:linear-gradient(135deg,#FFB300,#FF8F00);color:var(--navy);border:none;border-radius:10px;font-family:var(--font-display);font-size:0.88rem;font-weight:800;cursor:pointer;">🔄 Refresh Recommendations</button>
+      </div>
+
+      <div id="fullRecsList"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="dbToast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;font-family:var(--font-display);font-size:0.9rem;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.3);pointer-events:none;max-width:90vw;text-align:center;opacity:0;transition:all 0.3s;"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DASHBOARD SCRIPT
+// ═══════════════════════════════════════════
+
+// ─── SCHEMES DATA (same as main site) ───
+const schemes = [
+  { id:1, name:'PM-KISAN Samman Nidhi', category:'agriculture', icon:'🌾', iconBg:'#E8F5E9', catColor:'#2E7D32', benefits:'₹6,000/year', eligibility:'Small & marginal farmers', applyUrl:'https://pmkisan.gov.in', tag:'Central', matchOcc:['farmer'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:2, name:'Ayushman Bharat PM-JAY', category:'health', icon:'🏥', iconBg:'#E3F2FD', catColor:'#1565C0', benefits:'₹5 lakh/year health insurance', eligibility:'SECC families, bottom 40%', applyUrl:'https://pmjay.gov.in', tag:'Central', matchOcc:['farmer','labour','homemaker','unemployed','student','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:3, name:'PM Scholarship Scheme', category:'education', icon:'🎓', iconBg:'#FFF3E0', catColor:'#E65100', benefits:'₹2,500–₹3,000/month', eligibility:'Ex-Servicemen wards, students', applyUrl:'https://ksb.gov.in/PM-scholarship.htm', tag:'Central', matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:4, name:'Beti Bachao Beti Padhao', category:'women', icon:'👧', iconBg:'#FCE4EC', catColor:'#C62828', benefits:'Sukanya Samriddhi at 8.2%', eligibility:'Girl child under 10 yrs', applyUrl:'https://wcd.nic.in/bbbp-schemes', tag:'Central', matchOcc:['farmer','homemaker','labour','student','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L'] },
+  { id:5, name:'Startup India Seed Fund', category:'startup', icon:'🚀', iconBg:'#E8EAF6', catColor:'#283593', benefits:'Up to ₹50 lakh seed fund', eligibility:'DPIIT recognized startups', applyUrl:'https://seedfund.startupindia.gov.in', tag:'Central', matchOcc:['business'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L'] },
+  { id:6, name:'Mahatma Gandhi NREGA', category:'employment', icon:'🔨', iconBg:'#F3E5F5', catColor:'#6A1B9A', benefits:'100 days work ₹250–340/day', eligibility:'Rural adults willing to work', applyUrl:'https://nrega.nic.in', tag:'Central', matchOcc:['farmer','labour','unemployed','homemaker'], matchIncome:['below1L','1L-2.5L'] },
+  { id:7, name:'PM Fasal Bima Yojana', category:'agriculture', icon:'🌿', iconBg:'#E8F5E9', catColor:'#2E7D32', benefits:'Crop insurance at low premium', eligibility:'All farmers', applyUrl:'https://pmfby.gov.in', tag:'Central', matchOcc:['farmer'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L'] },
+  { id:8, name:'Pradhan Mantri Mudra Yojana', category:'startup', icon:'💼', iconBg:'#E8EAF6', catColor:'#283593', benefits:'Loans up to ₹10 lakh', eligibility:'Small & micro enterprises', applyUrl:'https://www.mudra.org.in', tag:'Central', matchOcc:['business','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:9, name:'Janani Suraksha Yojana', category:'health', icon:'🤱', iconBg:'#E3F2FD', catColor:'#1565C0', benefits:'₹1,400 cash assistance', eligibility:'Pregnant BPL women', applyUrl:'https://nhm.gov.in', tag:'Central', matchOcc:['homemaker','farmer','labour'], matchIncome:['below1L','1L-2.5L'] },
+  { id:10, name:'National Scholarship Portal', category:'education', icon:'📚', iconBg:'#FFF3E0', catColor:'#E65100', benefits:'₹10,000–₹25,000/year', eligibility:'SC/ST/OBC/Minority students', applyUrl:'https://scholarships.gov.in', tag:'Central', matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:11, name:'PM Ujjwala Yojana', category:'women', icon:'🔥', iconBg:'#FCE4EC', catColor:'#C62828', benefits:'Free LPG connection', eligibility:'Women from BPL households', applyUrl:'https://www.pmuy.gov.in', tag:'Central', matchOcc:['homemaker','farmer','labour'], matchIncome:['below1L','1L-2.5L'] },
+  { id:12, name:'Skill India PMKVY 4.0', category:'employment', icon:'🎯', iconBg:'#F3E5F5', catColor:'#6A1B9A', benefits:'Free training + ₹8,000 reward', eligibility:'10th pass youth 15–45 yrs', applyUrl:'https://www.skillindia.gov.in', tag:'Central', matchOcc:['student','unemployed','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:13, name:'PM Awas Yojana (Urban)', category:'housing', icon:'🏠', iconBg:'#E8EAF6', catColor:'#283593', benefits:'₹1.5–2.67 lakh interest subsidy', eligibility:'EWS/LIG families, no pucca house', applyUrl:'https://pmaymis.gov.in', tag:'Central', matchOcc:['farmer','homemaker','labour','unemployed'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:14, name:'PM Awas Yojana (Gramin)', category:'housing', icon:'🏡', iconBg:'#E8F5E9', catColor:'#2E7D32', benefits:'₹1.20–1.30 lakh per unit', eligibility:'Rural BPL SECC families', applyUrl:'https://pmayg.nic.in', tag:'Central', matchOcc:['farmer','labour','homemaker','unemployed'], matchIncome:['below1L','1L-2.5L'] },
+  { id:15, name:'Sukanya Samriddhi Yojana', category:'women', icon:'👩‍👧', iconBg:'#FCE4EC', catColor:'#C62828', benefits:'8.2% interest, tax-free maturity', eligibility:'Girl child below 10 years', applyUrl:'https://www.indiapost.gov.in', tag:'Central', matchOcc:['farmer','homemaker','labour','student','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L'] },
+  { id:16, name:'Ladki Bahin Yojana (MH)', category:'women', icon:'👩', iconBg:'#FCE4EC', catColor:'#C62828', benefits:'₹1,500/month DBT', eligibility:'Married women 21–60 yrs MH', applyUrl:'https://ladakibahin.maharashtra.gov.in', tag:'Maharashtra', matchState:['maharashtra'], matchOcc:['homemaker','farmer','labour'], matchIncome:['below1L','1L-2.5L'] },
+  { id:17, name:'Rythu Bharosa (Andhra Pradesh)', category:'agriculture', icon:'🌾', iconBg:'#E8F5E9', catColor:'#2E7D32', benefits:'₹13,500/year to farmers', eligibility:'AP farmers and labourers', applyUrl:'https://apagrisnet.gov.in', tag:'Andhra Pradesh', matchState:['andhra'], matchOcc:['farmer','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:18, name:'Yuva Nidhi Scheme (Karnataka)', category:'employment', icon:'🎓', iconBg:'#F3E5F5', catColor:'#6A1B9A', benefits:'₹3,000/month for 2 years', eligibility:'Unemployed graduates in KA', applyUrl:'https://sevasindhu.karnataka.gov.in', tag:'Karnataka', matchState:['karnataka'], matchOcc:['unemployed','student'], matchIncome:['below1L','1L-2.5L'] },
+  { id:19, name:'Kalia Yojana (Odisha)', category:'agriculture', icon:'🌿', iconBg:'#E8F5E9', catColor:'#2E7D32', benefits:'₹10,000/year to farmers', eligibility:'Small/marginal farmers Odisha', applyUrl:'https://kalia.odisha.gov.in', tag:'Odisha', matchState:['odisha'], matchOcc:['farmer','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:20, name:'CMCHIS Health (Tamil Nadu)', category:'health', icon:'🏥', iconBg:'#E3F2FD', catColor:'#1565C0', benefits:'Free treatment ₹5 lakh', eligibility:'TN residents income below ₹72k', applyUrl:'https://www.tnhealth.tn.gov.in', tag:'Tamil Nadu', matchState:['tamilnadu'], matchOcc:['farmer','labour','homemaker'], matchIncome:['below1L','1L-2.5L'] },
+  { id:21, name:'Kanyashree Prakalpa (WB)', category:'women', icon:'👧', iconBg:'#FCE4EC', catColor:'#C62828', benefits:'₹25,000 grant at 18', eligibility:'Unmarried girls 13–18 in WB', applyUrl:'https://wbkanyashree.gov.in', tag:'West Bengal', matchState:['westbengal'], matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] },
+  { id:22, name:'Jai Bhim Pratibha Vikas (Delhi)', category:'education', icon:'📚', iconBg:'#FFF3E0', catColor:'#E65100', benefits:'Free coaching IIT/Medical/UPSC', eligibility:'SC/ST students Delhi schools', applyUrl:'https://scstwelfare.delhi.gov.in', tag:'Delhi', matchState:['delhi'], matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L'] }
+];
+
+// ─── TOAST ───
+function showToast(msg, type) {
+  const t = document.getElementById('dbToast');
+  if (!t) return;
+  const colors = { success:'#2E7D32', error:'#C62828', info:'#0A2342', warn:'#E65100' };
+  t.style.background = colors[type] || colors.info;
+  t.style.color = 'white';
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// ─── SECTION NAVIGATION ───
+function showSection(name) {
+  document.querySelectorAll('[id^="section-"]').forEach(el => el.style.display = 'none');
+  const s = document.getElementById('section-' + name);
+  if (s) s.style.display = 'block';
+
+  document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.classList.remove('active'));
+  const btns = document.querySelectorAll('.sidebar-nav-item');
+  btns.forEach(btn => {
+    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'" + name + "'")) {
+      btn.classList.add('active');
+    }
+  });
+
+  // Load section data
+  if (name === 'saved') renderFullSaved();
+  else if (name === 'tracker') renderFullTracker();
+  else if (name === 'reminders') renderFullReminders();
+  else if (name === 'recs') loadAIRecs();
+  else if (name === 'overview') loadOverview();
+}
+
+// ─── LOAD OVERVIEW ───
+function loadOverview() {
+  loadSidebarStats();
+
+  // Saved preview (3 items)
+  const saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  const overviewSaved = document.getElementById('overviewSavedList');
+  if (overviewSaved) {
+    if (saved.length === 0) {
+      overviewSaved.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:0.82rem;">No saved schemes yet. <a href="index.html#schemes" style="color:var(--blue);">Browse schemes →</a></div>';
+    } else {
+      overviewSaved.innerHTML = saved.slice(0,3).map(s => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--gray-50);border-radius:10px;margin-bottom:6px;border:1px solid var(--gray-100);">
+          <span style="font-size:18px;">${s.icon||'📋'}</span>
+          <span style="font-size:0.85rem;font-weight:600;color:var(--navy);flex:1;">${s.name}</span>
+          <a href="${s.url||'#'}" target="_blank" style="font-size:0.72rem;color:var(--blue);font-weight:700;text-decoration:none;">Apply ↗</a>
+        </div>
+      `).join('') + (saved.length > 3 ? `<div style="font-size:0.78rem;color:var(--gray-400);text-align:center;margin-top:4px;">+${saved.length-3} more saved</div>` : '');
+    }
+  }
+
+  // Tracker preview
+  const apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  const overviewTracker = document.getElementById('overviewTrackerList');
+  if (overviewTracker) {
+    if (apps.length === 0) {
+      overviewTracker.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:0.82rem;">No applications tracked yet.</div>';
+    } else {
+      const colors = { pending:'#F57F17', submitted:'#1565C0', approved:'#2E7D32' };
+      const labels = { pending:'⏳ Pending', submitted:'📤 Submitted', approved:'✅ Approved' };
+      overviewTracker.innerHTML = apps.slice(0,3).map(a => `
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:16px;">${a.icon||'📋'}</span>
+          <span style="font-size:0.82rem;font-weight:600;color:var(--navy);flex:1;">${a.name}</span>
+          <span style="padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:700;background:${colors[a.status]+'22'};color:${colors[a.status]};">${labels[a.status]||'⏳ Pending'}</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Reminders preview
+  const reminders = JSON.parse(localStorage.getItem('jansahay_reminders') || '[]');
+  const overviewRem = document.getElementById('overviewRemindersList');
+  if (overviewRem) {
+    if (reminders.length === 0) {
+      overviewRem.innerHTML = '<div style="text-align:center;padding:16px;color:var(--gray-400);font-size:0.82rem;">No reminders set yet.</div>';
+    } else {
+      const now = new Date();
+      overviewRem.innerHTML = reminders.slice(0,3).map(r => {
+        const daysLeft = Math.ceil((new Date(r.deadline) - now) / 864e5);
+        const color = daysLeft < 0 ? '#C62828' : daysLeft <= 7 ? '#E65100' : '#2E7D32';
+        return `
+          <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+            <span style="width:8px;height:8px;background:${color};border-radius:50%;flex-shrink:0;margin-top:5px;"></span>
+            <div style="flex:1;">
+              <div style="font-size:0.82rem;font-weight:600;color:var(--navy);">${r.name}</div>
+              <div style="font-size:0.7rem;color:${color};font-weight:700;">${daysLeft < 0 ? 'Deadline passed' : daysLeft + ' days left'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // AI Recs preview
+  const overviewRecs = document.getElementById('overviewRecsList');
+  if (overviewRecs) {
+    const defaultRecs = [
+      { icon:'🌾', name:'PM-KISAN Samman Nidhi', match:'98% · Farmers · Central', url:'https://pmkisan.gov.in', pct:98 },
+      { icon:'🏥', name:'Ayushman Bharat PM-JAY', match:'95% · All Families', url:'https://pmjay.gov.in', pct:95 },
+      { icon:'🎓', name:'National Scholarship Portal', match:'90% · Students', url:'https://scholarships.gov.in', pct:90 }
+    ];
+    overviewRecs.innerHTML = defaultRecs.map(r => `
+      <div class="ai-rec-card">
+        <div class="ai-rec-icon" style="background:var(--sky);">${r.icon}</div>
+        <div class="ai-rec-info">
+          <div class="ai-rec-name">${r.name}</div>
+          <div class="ai-rec-match">✅ ${r.match}</div>
+        </div>
+        <div class="ai-rec-pct">${r.pct}%</div>
+        <a href="${r.url}" target="_blank" style="padding:6px 14px;background:var(--blue);color:white;border-radius:8px;font-size:0.75rem;font-weight:700;text-decoration:none;white-space:nowrap;">Apply ↗</a>
+      </div>
+    `).join('');
+  }
+}
+
+// ─── SIDEBAR STATS ───
+function loadSidebarStats() {
+  const saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  const apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  const approved = apps.filter(a => a.status === 'approved').length;
+  const submitted = apps.filter(a => a.status === 'submitted' || a.status === 'pending').length;
+
+  const ssSaved = document.getElementById('statSaved');
+  const ssApplied = document.getElementById('statApplied');
+  const ssApproved = document.getElementById('statApproved');
+  if (ssSaved) ssSaved.textContent = saved.length;
+  if (ssApplied) ssApplied.textContent = submitted;
+  if (ssApproved) ssApproved.textContent = approved;
+}
+
+// ─── FULL SAVED SCHEMES ───
+function renderFullSaved() {
+  const list = document.getElementById('fullSavedList');
+  if (!list) return;
+  const saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  if (saved.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-400);"><div style="font-size:2.5rem;margin-bottom:12px;">⭐</div><div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--navy);">No Saved Schemes</div><p style="font-size:0.85rem;margin-top:8px;">Browse <a href="index.html#schemes" style="color:var(--blue);">government schemes</a> and click Save to add them here.</p></div>';
+    return;
+  }
+  list.innerHTML = saved.map(s => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);" data-saved-id="${s.id}">
+      <span style="font-size:20px;">${s.icon||'📋'}</span>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem;font-weight:600;color:var(--navy);">${s.name}</div>
+        <div style="font-size:0.72rem;color:var(--gray-400);">Saved ${s.savedAt ? new Date(s.savedAt).toLocaleDateString('en-IN') : ''}</div>
+      </div>
+      <a href="${s.url||'#'}" target="_blank" style="padding:6px 14px;background:var(--blue);color:white;border-radius:8px;font-size:0.75rem;font-weight:700;text-decoration:none;">Apply ↗</a>
+      <button onclick="removeSavedById(${s.id})" style="width:28px;height:28px;background:#FFEBEE;border:none;border-radius:50%;cursor:pointer;color:#C62828;font-size:13px;display:flex;align-items:center;justify-content:center;">✕</button>
+    </div>
+  `).join('');
+  loadSidebarStats();
+}
+
+function removeSavedById(id) {
+  let saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  saved = saved.filter(s => s.id !== id);
+  localStorage.setItem('jansahay_saved', JSON.stringify(saved));
+  renderFullSaved();
+  showToast('🗑️ Removed from saved.', 'info');
+}
+
+function promptAddScheme() {
+  const name = prompt('Enter scheme name to save:');
+  if (!name) return;
+  let saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  saved.push({ id: Date.now(), name, icon:'📋', url:'#', savedAt: Date.now() });
+  localStorage.setItem('jansahay_saved', JSON.stringify(saved));
+  renderFullSaved();
+  showToast('✅ Scheme saved!', 'success');
+}
+
+// ─── FULL TRACKER ───
+function renderFullTracker() {
+  const list = document.getElementById('fullTrackerList');
+  if (!list) return;
+  const apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  if (apps.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-400);"><div style="font-size:2.5rem;margin-bottom:12px;">📋</div><div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--navy);">No Applications Tracked</div><p style="font-size:0.85rem;margin-top:8px;">Click "+ Track New Application" to start tracking your scheme applications.</p></div>';
+    return;
+  }
+  const colors = { pending:'#F57F17', submitted:'#1565C0', approved:'#2E7D32' };
+  list.innerHTML = apps.map((a, i) => `
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+      <span style="font-size:18px;">${a.icon||'📋'}</span>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem;font-weight:600;color:var(--navy);">${a.name}</div>
+        ${a.deadline ? `<div style="font-size:0.72rem;color:var(--gray-400);">Deadline: ${a.deadline}</div>` : ''}
+      </div>
+      <select onchange="updateAppStatus(${i},this.value)" style="padding:5px 10px;border-radius:8px;border:1.5px solid ${colors[a.status]||colors.pending};font-size:0.72rem;font-weight:700;color:${colors[a.status]||colors.pending};background:white;cursor:pointer;outline:none;">
+        <option value="pending" ${a.status==='pending'?'selected':''}>⏳ Pending</option>
+        <option value="submitted" ${a.status==='submitted'?'selected':''}>📤 Submitted</option>
+        <option value="approved" ${a.status==='approved'?'selected':''}>✅ Approved</option>
+      </select>
+      <button onclick="removeApp(${i})" style="width:28px;height:28px;background:#FFEBEE;border:none;border-radius:50%;cursor:pointer;color:#C62828;font-size:13px;">✕</button>
+    </div>
+  `).join('');
+  loadSidebarStats();
+}
+
+function addApplicationTracker() {
+  const name = prompt('Which scheme did you apply for?');
+  if (!name) return;
+  const deadline = prompt('Deadline date? (e.g. 31 Dec 2025) — Leave blank to skip:');
+  let apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  apps.push({ name, icon:'📋', status:'pending', deadline:deadline||'', createdAt:Date.now() });
+  localStorage.setItem('jansahay_applications', JSON.stringify(apps));
+  renderFullTracker();
+  showToast('✅ Application added to tracker!', 'success');
+}
+
+function updateAppStatus(idx, status) {
+  let apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  if (apps[idx]) {
+    apps[idx].status = status;
+    localStorage.setItem('jansahay_applications', JSON.stringify(apps));
+    const labels = { pending:'⏳ Pending', submitted:'📤 Submitted', approved:'✅ Approved' };
+    showToast('✅ Status updated to: ' + (labels[status]||status), 'success');
+    loadSidebarStats();
+  }
+}
+
+function removeApp(idx) {
+  let apps = JSON.parse(localStorage.getItem('jansahay_applications') || '[]');
+  apps.splice(idx, 1);
+  localStorage.setItem('jansahay_applications', JSON.stringify(apps));
+  renderFullTracker();
+}
+
+// ─── FULL REMINDERS ───
+function renderFullReminders() {
+  const list = document.getElementById('fullRemindersList');
+  if (!list) return;
+  const reminders = JSON.parse(localStorage.getItem('jansahay_reminders') || '[]');
+  if (reminders.length === 0) {
+    list.innerHTML = '<div style="text-align:center;padding:32px;color:var(--gray-400);"><div style="font-size:2.5rem;margin-bottom:12px;">⏰</div><div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--navy);">No Reminders Set</div><p style="font-size:0.85rem;margin-top:8px;">Add reminders to get alerts about scheme deadlines.</p></div>';
+    return;
+  }
+  const now = new Date();
+  list.innerHTML = reminders.map((r, i) => {
+    const daysLeft = Math.ceil((new Date(r.deadline) - now) / 864e5);
+    let urgencyColor = '#2E7D32';
+    let urgencyLabel = daysLeft + ' days left';
+    if (daysLeft < 0) { urgencyColor = '#C62828'; urgencyLabel = 'Deadline passed'; }
+    else if (daysLeft <= 7) { urgencyColor = '#E65100'; urgencyLabel = '⚠️ ' + daysLeft + ' days left!'; }
+    else if (daysLeft <= 30) { urgencyColor = '#F57F17'; urgencyLabel = '🔔 ' + daysLeft + ' days'; }
+    return `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--gray-100);">
+        <div style="width:10px;height:10px;border-radius:50%;background:${urgencyColor};flex-shrink:0;margin-top:5px;"></div>
+        <div style="flex:1;">
+          <div style="font-size:0.88rem;font-weight:600;color:var(--navy);">${r.name}</div>
+          <div style="font-size:0.75rem;color:${urgencyColor};font-weight:700;margin-top:2px;">${urgencyLabel}</div>
+          <div style="font-size:0.72rem;color:var(--gray-400);">Deadline: ${r.deadline}</div>
+        </div>
+        <button onclick="removeReminder(${i})" style="width:28px;height:28px;background:#FFEBEE;border:none;border-radius:50%;cursor:pointer;color:#C62828;font-size:13px;">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function addReminder() {
+  const name = prompt('Scheme name for reminder:');
+  if (!name) return;
+  const deadline = prompt('Deadline date (e.g. 2025-12-31 or 31 Dec 2025):');
+  if (!deadline) return;
+  let reminders = JSON.parse(localStorage.getItem('jansahay_reminders') || '[]');
+  reminders.push({ name, deadline, createdAt: Date.now() });
+  localStorage.setItem('jansahay_reminders', JSON.stringify(reminders));
+  renderFullReminders();
+  showToast('⏰ Reminder set for ' + name, 'success');
+}
+
+function removeReminder(idx) {
+  let reminders = JSON.parse(localStorage.getItem('jansahay_reminders') || '[]');
+  reminders.splice(idx, 1);
+  localStorage.setItem('jansahay_reminders', JSON.stringify(reminders));
+  renderFullReminders();
+}
+
+// ─── AI RECOMMENDATIONS (with score calc) ───
+function calculateScore(scheme, profile) {
+  let score = 0, max = 0;
+  max += 30;
+  if (scheme.matchOcc && profile.occ) {
+    if (scheme.matchOcc.includes(profile.occ)) score += 30;
+    else if (scheme.matchOcc.includes('other')) score += 15;
+  } else score += 20;
+  max += 25;
+  if (scheme.matchIncome && profile.income) {
+    if (scheme.matchIncome.includes(profile.income)) score += 25;
+  } else score += 18;
+  max += 10;
+  if (scheme.matchState) {
+    if (profile.state && scheme.matchState.includes(profile.state)) score += 10;
+  } else score += 10;
+  return Math.min(Math.round((score / max) * 100), 97);
+}
+
+function loadAIRecs() {
+  const state = document.getElementById('recState') ? document.getElementById('recState').value : '';
+  const occ = document.getElementById('recOcc') ? document.getElementById('recOcc').value : '';
+  const income = document.getElementById('recIncome') ? document.getElementById('recIncome').value : '';
+  const profile = { state, occ, income };
+
+  const scored = schemes.map(s => ({ ...s, score: calculateScore(s, profile) }))
+    .sort((a, b) => b.score - a.score);
+
+  const list = document.getElementById('fullRecsList');
+  if (!list) return;
+
+  list.innerHTML = scored.map(s => {
+    const color = s.score >= 80 ? '#2E7D32' : s.score >= 50 ? '#E65100' : '#C62828';
+    const badge = s.score >= 80 ? 'Highly Eligible' : s.score >= 50 ? 'Moderately Eligible' : 'Low Eligibility';
+    const bgColor = s.score >= 80 ? '#E8F5E9' : s.score >= 50 ? '#FFF3E0' : '#FFEBEE';
+    return `
+      <div class="ai-rec-card" style="margin-bottom:10px;border-radius:14px;padding:16px;">
+        <div class="ai-rec-icon" style="background:${s.iconBg};">${s.icon}</div>
+        <div class="ai-rec-info">
+          <div class="ai-rec-name">${s.name}</div>
+          <div style="font-size:0.72rem;color:var(--gray-400);margin-top:2px;">${s.tag} · ${s.category}</div>
+          <div style="margin-top:6px;height:5px;background:var(--gray-100);border-radius:3px;overflow:hidden;width:120px;">
+            <div style="height:100%;width:${s.score}%;background:${color};border-radius:3px;transition:width 1s;"></div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:800;color:${color};">${s.score}%</div>
+          <span style="padding:2px 8px;border-radius:100px;font-size:0.65rem;font-weight:700;background:${bgColor};color:${color};">${badge}</span>
+        </div>
+        <a href="${s.applyUrl}" target="_blank" style="padding:8px 14px;background:var(--blue);color:white;border-radius:8px;font-size:0.78rem;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;">Apply ↗</a>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── NEARBY HELP CENTER ───
+function findNearbyHelp() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const mapEl = document.getElementById('nearbyMap');
+      if (mapEl) {
+        mapEl.src = `https://www.google.com/maps/embed/v1/search?q=common+service+centre+near+me&center=${lat},${lng}&zoom=13&key=AIzaSyA6PH4wadxQcxiA7K4jqN28nasBMNnVPFw`;
+        document.getElementById('nearbyMapContainer').style.display = 'block';
+      }
+    }, function() {
+      // fallback - open Google Maps in new tab
+      window.open('https://www.google.com/maps/search/Common+Service+Centre+near+me/', '_blank');
+    });
+  } else {
+    window.open('https://www.google.com/maps/search/Common+Service+Centre+near+me/', '_blank');
+  }
+}
+
+// ─── MOBILE MENU ───
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn = document.getElementById('hamburgerBtn');
+  if (menu) menu.classList.toggle('open');
+  if (btn) btn.classList.toggle('active');
+}
+
+// ─── LOGOUT ───
+function logout() {
+  localStorage.removeItem('loggedInUser');
+  window.location.href = 'login.html';
+}
+
+// ─── AUTH + PROFILE INIT ───
+function initDashboard() {
+  const rawUser = localStorage.getItem('loggedInUser');
+  let displayName = 'Citizen';
+  let email = 'Guest User';
+  let pct = 0;
+
+  if (rawUser) {
+    try {
+      const u = JSON.parse(rawUser);
+      displayName = u.displayName || u.name || 'Citizen';
+      email = u.email || 'No email';
+    } catch(e) {
+      displayName = rawUser;
+    }
+
+    // Show logout in mobile menu
+    const mobileLogout = document.getElementById('mobileLogout');
+    if (mobileLogout) mobileLogout.style.display = 'block';
+
+    // Update auth button
+    const authBtn = document.getElementById('authBtn');
+    const authDropdown = document.getElementById('authDropdown');
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (authBtn) {
+      authBtn.textContent = displayName.split(' ')[0] + ' ▼';
+      authBtn.href = '#';
+      authBtn.addEventListener('click', e => { e.preventDefault(); if(authDropdown) authDropdown.classList.toggle('hidden'); });
+    }
+    if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  }
+
+  // Calculate completion
+  const faProfile = JSON.parse(localStorage.getItem('jansahay_fa_profile') || '{}');
+  const filled = [faProfile.name, faProfile.state, faProfile.occupation, faProfile.mobile, faProfile.email].filter(Boolean).length;
+  pct = Math.round((filled / 5) * 100);
+  if (rawUser) pct = Math.max(pct, 20); // at least 20% if logged in
+
+  // Update sidebar
+  const nameEl = document.getElementById('sidebarName');
+  const emailEl = document.getElementById('sidebarEmail');
+  const pctEl = document.getElementById('sidebarPct');
+  const pctBar = document.getElementById('sidebarPctBar');
+  const welcomeName = document.getElementById('welcomeName');
+
+  if (nameEl) nameEl.textContent = displayName;
+  if (emailEl) emailEl.textContent = email;
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (pctBar) pctBar.style.width = pct + '%';
+  if (welcomeName) welcomeName.textContent = displayName.split(' ')[0];
+
+  // Set avatar initial
+  const avatarEl = document.getElementById('sidebarAvatar');
+  if (avatarEl && displayName !== 'Citizen') {
+    avatarEl.textContent = displayName[0].toUpperCase();
+    avatarEl.style.fontSize = '1.8rem';
+  }
+
+  // Pre-load finder profile into selects
+  const finderProfile = JSON.parse(localStorage.getItem('jansahay_finder_profile') || '{}');
+  if (finderProfile.state) {
+    const recState = document.getElementById('recState');
+    if (recState) recState.value = finderProfile.state;
+  }
+  if (finderProfile.occupation) {
+    const recOcc = document.getElementById('recOcc');
+    if (recOcc) recOcc.value = finderProfile.occupation;
+  }
+  if (finderProfile.income) {
+    const recIncome = document.getElementById('recIncome');
+    if (recIncome) recIncome.value = finderProfile.income;
+  }
+
+  // Load initial overview
+  loadOverview();
+
+  // Check for upcoming deadlines
+  checkDeadlineAlerts();
+}
+
+// ─── CHECK DEADLINE ALERTS ───
+function checkDeadlineAlerts() {
+  const reminders = JSON.parse(localStorage.getItem('jansahay_reminders') || '[]');
+  const now = new Date();
+  reminders.forEach(r => {
+    const daysLeft = Math.ceil((new Date(r.deadline) - now) / 864e5);
+    if (daysLeft >= 0 && daysLeft <= 7) {
+      showToast(`⚠️ Deadline in ${daysLeft} days: ${r.name}`, 'warn');
+    }
+  });
+}
+
+// ─── INIT ───
+document.addEventListener('DOMContentLoaded', initDashboard);
+</script>
+</body>
+</html>

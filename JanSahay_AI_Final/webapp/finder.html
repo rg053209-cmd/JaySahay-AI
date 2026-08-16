@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find My Scheme — JanSahay AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Noto+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .finder-hero {
+    background: linear-gradient(135deg, #0A2342 0%, #0D47A1 60%, #1B5E20 100%);
+    padding: 80px 24px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .finder-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .finder-form-wrap {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(10,35,66,0.2);
+    padding: 40px;
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .finder-step {
+    display: none;
+  }
+  .finder-step.active {
+    display: block;
+    animation: fadeSlide 0.4s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .step-indicator {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .step-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #E2E8F0;
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: #1565C0; transform: scale(1.3); }
+  .step-dot.done { background: #2E7D32; }
+  .finder-label {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #0A2342;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .finder-sub {
+    font-size: 0.9rem;
+    color: #475569;
+    text-align: center;
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .option-btn {
+    padding: 16px 12px;
+    border: 2px solid #E2E8F0;
+    border-radius: 14px;
+    background: #F8FAFB;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'Baloo 2', cursive;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .option-btn:hover { border-color: #1565C0; background: #E3F2FD; color: #1565C0; }
+  .option-btn.selected { border-color: #1565C0; background: #1565C0; color: white; }
+  .option-btn .option-icon { font-size: 24px; }
+  .finder-input {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid #E2E8F0;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 1rem;
+    color: #1E293B;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 16px;
+  }
+  .finder-input:focus { border-color: #42A5F5; }
+  .finder-select {
+    width: 100%;
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid #E2E8F0;
+    font-family: 'Noto Sans', sans-serif;
+    font-size: 1rem;
+    color: #1E293B;
+    outline: none;
+    cursor: pointer;
+    background: white;
+    margin-bottom: 16px;
+  }
+  .finder-select:focus { border-color: #42A5F5; }
+  .nav-btns {
+    display: flex; gap: 12px; justify-content: space-between;
+    margin-top: 8px;
+  }
+  .btn-next {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(21,101,192,0.4); }
+  .btn-back {
+    padding: 14px 24px;
+    background: #F1F5F9;
+    color: #475569;
+    border: none; border-radius: 12px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-back:hover { background: #E2E8F0; }
+  .btn-find {
+    flex: 1;
+    padding: 14px;
+    background: linear-gradient(135deg, #2E7D32, #1565C0);
+    color: white;
+    border: none; border-radius: 12px;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-find:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(46,125,50,0.4); }
+  /* Results */
+  .result-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #E2E8F0;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(10,35,66,0.08);
+    transition: all 0.3s;
+  }
+  .result-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,35,66,0.12); }
+  .score-bar {
+    height: 8px; border-radius: 100px;
+    background: #E2E8F0; overflow: hidden;
+    margin-top: 8px;
+  }
+  .score-fill {
+    height: 100%; border-radius: 100px;
+    transition: width 1s ease;
+  }
+  .score-high { background: linear-gradient(90deg, #2E7D32, #43A047); }
+  .score-mid { background: linear-gradient(90deg, #F57F17, #FFB300); }
+  .score-low { background: linear-gradient(90deg, #C62828, #E53935); }
+  .score-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 100px;
+    font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+  .badge-high { background: #E8F5E9; color: #2E7D32; }
+  .badge-mid { background: #FFF3E0; color: #E65100; }
+  .badge-low { background: #FFEBEE; color: #C62828; }
+  .step-guide-list {
+    counter-reset: step-counter;
+    list-style: none;
+    padding: 0; margin: 10px 0 0 0;
+  }
+  .step-guide-list li {
+    counter-increment: step-counter;
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 8px; font-size: 0.82rem; color: #475569; line-height: 1.5;
+  }
+  .step-guide-list li::before {
+    content: counter(step-counter);
+    min-width: 22px; height: 22px;
+    background: #1565C0; color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+  }
+  .results-header {
+    text-align: center; margin-bottom: 32px;
+    padding: 24px;
+    background: linear-gradient(135deg, #E3F2FD, #E8F5E9);
+    border-radius: 16px;
+  }
+  .save-btn-result {
+    padding: 6px 14px;
+    background: white;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 8px;
+    font-size: 0.75rem; font-weight: 700;
+    cursor: pointer; color: #475569;
+    transition: all 0.2s;
+  }
+  .save-btn-result:hover { border-color: #1565C0; color: #1565C0; background: #E3F2FD; }
+  .save-btn-result.saved { background: #E8F5E9; color: #2E7D32; border-color: #A5D6A7; }
+  @media (max-width: 600px) {
+    .finder-form-wrap { padding: 24px 16px; }
+    .option-grid { grid-template-columns: 1fr 1fr; }
+    .finder-hero { padding: 100px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Announce Bar -->
+<div class="announce-bar">
+  🇮🇳 <a href="index.html">← Back to JanSahay AI</a> · 🔍 Find Your Perfect Government Scheme
+</div>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo">🤖</div>
+    <div>
+      <div class="nav-title">JanSahay AI</div>
+      <div class="nav-subtitle">जन सहाय</div>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="index.html">🏠 Home</a></li>
+    <li><a href="index.html#schemes">📋 Schemes</a></li>
+    <li><a href="index.html#assistant">💬 AI Chat</a></li>
+    <li><a href="index.html#dashboard">📊 Dashboard</a></li>
+  </ul>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div class="nav-auth" id="authWrapper">
+      <a href="login.html" id="authBtn" class="nav-btn">Login / Signup</a>
+      <div id="authDropdown" class="dropdown hidden">
+        <button id="logoutBtn">Logout</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="finder-hero" style="padding-top:88px;">
+  <div style="position:relative;z-index:1;">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:100px;padding:6px 18px;font-size:0.78rem;color:rgba(255,255,255,0.9);font-weight:600;margin-bottom:20px;">
+      <span style="width:7px;height:7px;border-radius:50%;background:#A5D6A7;box-shadow:0 0 8px #A5D6A7;display:inline-block;"></span>
+      🔍 AI-Powered Scheme Finder
+    </div>
+    <h1 style="font-family:'Baloo 2',cursive;font-size:clamp(2rem,4vw,3rem);font-weight:800;color:white;margin-bottom:12px;line-height:1.1;">
+      Find Schemes <span style="background:linear-gradient(135deg,#FFD54F,#FF8F00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Made For You</span>
+    </h1>
+    <p style="font-size:1rem;color:rgba(255,255,255,0.75);max-width:520px;margin:0 auto 32px;line-height:1.7;">Answer 5 simple questions and get a personalized list of government schemes you're most eligible for — with eligibility scores!</p>
+  </div>
+</div>
+
+<!-- Main Finder Form -->
+<section style="background:var(--off-white);padding:0 24px 80px;margin-top:-40px;position:relative;z-index:2;">
+  <div style="max-width:700px;margin:0 auto;">
+
+    <!-- FORM CARD -->
+    <div id="finderFormCard" class="finder-form-wrap">
+
+      <!-- Progress Steps -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+        <div class="step-dot" id="dot4"></div>
+        <div class="step-dot" id="dot5"></div>
+      </div>
+
+      <!-- STEP 1: Age -->
+      <div class="finder-step active" id="step1">
+        <div class="finder-label">🎂 What is your age?</div>
+        <div class="finder-sub">Your age helps us find age-specific schemes and benefits</div>
+        <div class="option-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="option-btn" onclick="selectOption('age','below18',this)"><span class="option-icon">👧</span>Under 18</div>
+          <div class="option-btn" onclick="selectOption('age','18-25',this)"><span class="option-icon">🧑</span>18–25 yrs</div>
+          <div class="option-btn" onclick="selectOption('age','26-40',this)"><span class="option-icon">👨</span>26–40 yrs</div>
+          <div class="option-btn" onclick="selectOption('age','41-60',this)"><span class="option-icon">🧔</span>41–60 yrs</div>
+          <div class="option-btn" onclick="selectOption('age','above60',this)"><span class="option-icon">👴</span>Above 60</div>
+          <div class="option-btn" onclick="selectOption('age','any',this)"><span class="option-icon">🔄</span>Not Sure</div>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-next" onclick="nextStep(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Gender -->
+      <div class="finder-step" id="step2">
+        <div class="finder-label">👤 What is your gender?</div>
+        <div class="finder-sub">Some schemes are specifically designed for women and girls</div>
+        <div class="option-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="option-btn" onclick="selectOption('gender','male',this)"><span class="option-icon">👨</span>Male</div>
+          <div class="option-btn" onclick="selectOption('gender','female',this)"><span class="option-icon">👩</span>Female</div>
+          <div class="option-btn" onclick="selectOption('gender','other',this)"><span class="option-icon">🏳️‍🌈</span>Other</div>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep(1)">← Back</button>
+          <button class="btn-next" onclick="nextStep(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: State -->
+      <div class="finder-step" id="step3">
+        <div class="finder-label">📍 Which state are you from?</div>
+        <div class="finder-sub">State-specific schemes vary by location — we'll include both Central and State schemes for you</div>
+        <select class="finder-select" id="finderState" onchange="profileData.state=this.value">
+          <option value="">-- Select your State --</option>
+          <option value="maharashtra">Maharashtra</option>
+          <option value="up">Uttar Pradesh</option>
+          <option value="mp">Madhya Pradesh</option>
+          <option value="rajasthan">Rajasthan</option>
+          <option value="karnataka">Karnataka</option>
+          <option value="andhra">Andhra Pradesh</option>
+          <option value="telangana">Telangana</option>
+          <option value="tamilnadu">Tamil Nadu</option>
+          <option value="westbengal">West Bengal</option>
+          <option value="odisha">Odisha</option>
+          <option value="gujarat">Gujarat</option>
+          <option value="punjab">Punjab</option>
+          <option value="bihar">Bihar</option>
+          <option value="jharkhand">Jharkhand</option>
+          <option value="delhi">Delhi</option>
+          <option value="other">Other State</option>
+        </select>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep(2)">← Back</button>
+          <button class="btn-next" onclick="nextStep(4)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Occupation -->
+      <div class="finder-step" id="step4">
+        <div class="finder-label">💼 What is your occupation?</div>
+        <div class="finder-sub">Your profession determines which employment, agriculture, and business schemes you qualify for</div>
+        <div class="option-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="option-btn" onclick="selectOption('occupation','farmer',this)"><span class="option-icon">🌾</span>Farmer / Kisan</div>
+          <div class="option-btn" onclick="selectOption('occupation','student',this)"><span class="option-icon">🎓</span>Student</div>
+          <div class="option-btn" onclick="selectOption('occupation','homemaker',this)"><span class="option-icon">🏠</span>Homemaker</div>
+          <div class="option-btn" onclick="selectOption('occupation','business',this)"><span class="option-icon">💼</span>Business / MSME</div>
+          <div class="option-btn" onclick="selectOption('occupation','labour',this)"><span class="option-icon">🔨</span>Daily Labour</div>
+          <div class="option-btn" onclick="selectOption('occupation','unemployed',this)"><span class="option-icon">🔍</span>Unemployed</div>
+          <div class="option-btn" onclick="selectOption('occupation','government',this)"><span class="option-icon">🏛️</span>Govt Employee</div>
+          <div class="option-btn" onclick="selectOption('occupation','other',this)"><span class="option-icon">👤</span>Other</div>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep(3)">← Back</button>
+          <button class="btn-next" onclick="nextStep(5)">Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: Income -->
+      <div class="finder-step" id="step5">
+        <div class="finder-label">💰 Annual Family Income?</div>
+        <div class="finder-sub">Income criteria helps us find BPL, EWS, and income-based schemes that you qualify for</div>
+        <div class="option-grid" style="grid-template-columns:repeat(2,1fr);">
+          <div class="option-btn" onclick="selectOption('income','below1L',this)"><span class="option-icon">📉</span>Below ₹1 Lakh</div>
+          <div class="option-btn" onclick="selectOption('income','1L-2.5L',this)"><span class="option-icon">💵</span>₹1L – ₹2.5L</div>
+          <div class="option-btn" onclick="selectOption('income','2.5L-5L',this)"><span class="option-icon">💰</span>₹2.5L – ₹5L</div>
+          <div class="option-btn" onclick="selectOption('income','5L-10L',this)"><span class="option-icon">💳</span>₹5L – ₹10L</div>
+          <div class="option-btn" onclick="selectOption('income','above10L',this)"><span class="option-icon">🏦</span>Above ₹10L</div>
+          <div class="option-btn" onclick="selectOption('income','unknown',this)"><span class="option-icon">🤷</span>Not Sure</div>
+        </div>
+        <div class="nav-btns">
+          <button class="btn-back" onclick="prevStep(4)">← Back</button>
+          <button class="btn-find" onclick="findSchemes()">🔍 Find My Schemes!</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RESULTS SECTION -->
+    <div id="resultsSection" style="display:none;">
+      <div class="results-header">
+        <div style="font-size:2.5rem;margin-bottom:8px;">🎯</div>
+        <h2 style="font-family:'Baloo 2',cursive;font-size:1.6rem;font-weight:800;color:var(--navy);margin-bottom:8px;">Your Personalized Schemes</h2>
+        <p style="font-size:0.9rem;color:var(--gray-600);">Based on your profile, here are government schemes you're most eligible for:</p>
+        <div id="resultsSummaryBadges" style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;"></div>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;justify-content:center;">
+        <button class="scheme-tab active" onclick="filterResults('all',this)" style="padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:600;border:2px solid var(--blue);background:var(--blue);color:white;cursor:pointer;">All</button>
+        <button class="scheme-tab" onclick="filterResults('high',this)" style="padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:600;border:2px solid #E2E8F0;background:white;color:var(--gray-600);cursor:pointer;">🟢 Highly Eligible</button>
+        <button class="scheme-tab" onclick="filterResults('mid',this)" style="padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:600;border:2px solid #E2E8F0;background:white;color:var(--gray-600);cursor:pointer;">🟡 Moderate</button>
+        <button class="scheme-tab" onclick="filterResults('low',this)" style="padding:6px 16px;border-radius:100px;font-size:0.82rem;font-weight:600;border:2px solid #E2E8F0;background:white;color:var(--gray-600);cursor:pointer;">🔴 Low Eligibility</button>
+      </div>
+
+      <div id="resultsGrid"></div>
+
+      <div style="text-align:center;margin-top:32px;">
+        <button onclick="resetFinder()" style="padding:12px 32px;background:var(--navy);color:white;border:none;border-radius:12px;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;cursor:pointer;margin-right:12px;">🔄 Try Again</button>
+        <a href="index.html#schemes" style="padding:12px 32px;background:var(--blue);color:white;border-radius:12px;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;text-decoration:none;display:inline-block;">📋 Explore All Schemes →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<div class="tricolor-strip"></div>
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">🤖</div>
+      <div>
+        <div class="footer-name">JanSahay AI</div>
+        <div class="footer-tagline">जन सेवा · AI की शक्ति से</div>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a href="index.html">Home</a>
+      <a href="index.html#schemes">Schemes</a>
+      <a href="index.html#assistant">AI Chat</a>
+      <a href="index.html#dashboard">Dashboard</a>
+    </div>
+  </div>
+  <div class="container">
+    <div class="footer-copy">Made with 🇮🇳 for every Indian citizen · © 2024 JanSahay AI Technologies Pvt Ltd</div>
+  </div>
+</footer>
+
+<script>
+// ─── SCHEMES DATA (same as main site, kept in sync) ───
+const schemes = [
+  { id:1, name:'PM-KISAN Samman Nidhi', category:'agriculture', icon:'🌾', iconBg:'#E8F5E9', catColor:'#2E7D32', catBg:'#E8F5E9', eligibility:'Small & marginal farmers with arable land', documents:'Aadhaar, Bank Account, Land Records', benefits:'₹6,000/year in 3 installments of ₹2,000', howToApply:'Visit CSC or apply online at pmkisan.gov.in', applyUrl:'https://pmkisan.gov.in', tag:'Central',
+    matchOcc:['farmer'], matchIncome:['below1L','1L-2.5L','2.5L-5L'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:70 },
+  { id:2, name:'Ayushman Bharat PM-JAY', category:'health', icon:'🏥', iconBg:'#E3F2FD', catColor:'#1565C0', catBg:'#E3F2FD', eligibility:'SECC database families · Bottom 40% income', documents:'Aadhaar, Ration Card, SECC letter', benefits:'₹5 lakh/year health insurance per family', howToApply:'Visit empanelled hospital or check eligibility online', applyUrl:'https://pmjay.gov.in', tag:'Central',
+    matchOcc:['farmer','labour','homemaker','unemployed','student','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L'], matchGender:['male','female','other'], matchAge:['below18','18-25','26-40','41-60','above60'], minScore:60 },
+  { id:3, name:'PM Scholarship Scheme', category:'education', icon:'🎓', iconBg:'#FFF3E0', catColor:'#E65100', catBg:'#FFF3E0', eligibility:'Wards of Ex-Servicemen, meritorious students', documents:'Mark sheets, Aadhaar, Bank account, ESM Certificate', benefits:'₹2,500–₹3,000/month for UG/PG courses', howToApply:'Apply on KSB portal before September deadline', applyUrl:'https://ksb.gov.in/PM-scholarship.htm', tag:'Central',
+    matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['below18','18-25'], minScore:55 },
+  { id:4, name:'Beti Bachao Beti Padhao', category:'women', icon:'👧', iconBg:'#FCE4EC', catColor:'#C62828', catBg:'#FCE4EC', eligibility:'Girl child under 10 years · All families', documents:'Birth certificate, Parents Aadhaar, Bank account', benefits:'Sukanya Samriddhi Account · 8.2% interest · tax-free', howToApply:'Open SSY account at Post Office or bank branch', applyUrl:'https://wcd.nic.in/bbbp-schemes', tag:'Central',
+    matchOcc:['farmer','homemaker','labour','unemployed','student','business','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L','above10L','unknown'], matchGender:['female'], matchAge:['below18','18-25','26-40'], minScore:50 },
+  { id:5, name:'Startup India Seed Fund', category:'startup', icon:'🚀', iconBg:'#E8EAF6', catColor:'#283593', catBg:'#E8EAF6', eligibility:'DPIIT recognized startups, less than 2 years old', documents:'DPIIT certificate, Business plan, KYC docs', benefits:'Up to ₹50 lakh as seed funding via incubators', howToApply:'Apply through recognized incubators on portal', applyUrl:'https://seedfund.startupindia.gov.in', tag:'Central',
+    matchOcc:['business'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40'], minScore:60 },
+  { id:6, name:'Mahatma Gandhi NREGA', category:'employment', icon:'🔨', iconBg:'#F3E5F5', catColor:'#6A1B9A', catBg:'#F3E5F5', eligibility:'Rural household adults willing to do manual work', documents:'Job Card, Aadhaar, Bank account', benefits:'100 days guaranteed work · ₹250–340/day wage', howToApply:'Register at Gram Panchayat and apply for Job Card', applyUrl:'https://nrega.nic.in', tag:'Central',
+    matchOcc:['farmer','labour','unemployed','homemaker','other'], matchIncome:['below1L','1L-2.5L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:65 },
+  { id:7, name:'PM Fasal Bima Yojana', category:'agriculture', icon:'🌿', iconBg:'#E8F5E9', catColor:'#2E7D32', catBg:'#E8F5E9', eligibility:'All farmers — tenant and owner farmers', documents:'Land record, Bank account, Aadhaar, Crop sowing certificate', benefits:'Crop insurance against natural calamities at low premium', howToApply:'Apply at nearest bank or CSC before crop season', applyUrl:'https://pmfby.gov.in', tag:'Central',
+    matchOcc:['farmer'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:70 },
+  { id:8, name:'Pradhan Mantri Mudra Yojana', category:'startup', icon:'💼', iconBg:'#E8EAF6', catColor:'#283593', catBg:'#E8EAF6', eligibility:'Non-farm small & micro enterprises', documents:'Business plan, KYC, Bank statement', benefits:'Loans up to ₹10 lakh (Shishu/Kishore/Tarun)', howToApply:'Apply at any bank, NBFC, or MFI branch', applyUrl:'https://www.mudra.org.in', tag:'Central',
+    matchOcc:['business','labour','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:60 },
+  { id:9, name:'Janani Suraksha Yojana', category:'health', icon:'🤱', iconBg:'#E3F2FD', catColor:'#1565C0', catBg:'#E3F2FD', eligibility:'Pregnant women from BPL families', documents:'Aadhaar, MCH card, Bank account, BPL certificate', benefits:'₹1,400 (rural) / ₹1,000 (urban) cash assistance', howToApply:'Register at nearest government health centre or ANM', applyUrl:'https://nhm.gov.in', tag:'Central',
+    matchOcc:['homemaker','farmer','labour','unemployed','other'], matchIncome:['below1L','1L-2.5L'], matchGender:['female'], matchAge:['18-25','26-40'], minScore:55 },
+  { id:10, name:'National Scholarship Portal', category:'education', icon:'📚', iconBg:'#FFF3E0', catColor:'#E65100', catBg:'#FFF3E0', eligibility:'SC/ST/OBC/Minority students at pre/post-matric', documents:'Marks certificate, Caste certificate, Aadhaar, Bank account', benefits:'₹10,000–₹25,000/year based on course and category', howToApply:'Register on NSP portal before application deadline', applyUrl:'https://scholarships.gov.in', tag:'Central',
+    matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['below18','18-25'], minScore:65 },
+  { id:11, name:'PM Ujjwala Yojana', category:'women', icon:'🔥', iconBg:'#FCE4EC', catColor:'#C62828', catBg:'#FCE4EC', eligibility:'Women from BPL households, no existing LPG', documents:'BPL card, Aadhaar, Bank account, Ration card', benefits:'Free LPG connection + first refill subsidy', howToApply:'Visit nearest LPG distributor with documents', applyUrl:'https://www.pmuy.gov.in', tag:'Central',
+    matchOcc:['homemaker','farmer','labour','unemployed','other'], matchIncome:['below1L','1L-2.5L'], matchGender:['female'], matchAge:['18-25','26-40','41-60'], minScore:60 },
+  { id:12, name:'Skill India PMKVY 4.0', category:'employment', icon:'🎯', iconBg:'#F3E5F5', catColor:'#6A1B9A', catBg:'#F3E5F5', eligibility:'10th pass youth, 15–45 years age', documents:'Educational certificates, Aadhaar, Bank account', benefits:'Free skill training + certification + ₹8,000 reward', howToApply:'Register on Skill India portal or visit nearest PMKVY centre', applyUrl:'https://www.skillindia.gov.in', tag:'Central',
+    matchOcc:['student','unemployed','labour','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['below18','18-25','26-40'], minScore:60 },
+  { id:13, name:'PM Awas Yojana (Urban)', category:'housing', icon:'🏠', iconBg:'#E8EAF6', catColor:'#283593', catBg:'#E8EAF6', eligibility:'EWS/LIG/MIG families without pucca house in urban area', documents:'Aadhaar, Income proof, Land documents, Bank passbook', benefits:'₹1.5–2.67 lakh interest subsidy for housing', howToApply:'Apply through city municipality or Common Service Centre', applyUrl:'https://pmaymis.gov.in', tag:'Central',
+    matchOcc:['farmer','homemaker','labour','unemployed','business','government','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:55 },
+  { id:14, name:'PM Awas Yojana (Gramin)', category:'housing', icon:'🏡', iconBg:'#E8F5E9', catColor:'#2E7D32', catBg:'#E8F5E9', eligibility:'Rural BPL/SECC listed families without pucca house', documents:'Aadhaar, SECC list copy, Bank passbook, Land certificate', benefits:'₹1.20 lakh (plain) / ₹1.30 lakh (hilly/NE) per unit', howToApply:'Apply through Gram Panchayat; shortlisting via SECC data', applyUrl:'https://pmayg.nic.in', tag:'Central',
+    matchOcc:['farmer','labour','homemaker','unemployed','other'], matchIncome:['below1L','1L-2.5L'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], minScore:65 },
+  { id:15, name:'Sukanya Samriddhi Yojana', category:'women', icon:'👩‍👧', iconBg:'#FCE4EC', catColor:'#C62828', catBg:'#FCE4EC', eligibility:'Girl child below 10 years of age', documents:'Girl birth certificate, Parent Aadhaar and PAN, Address proof', benefits:'8.2% annual interest · Tax-free maturity at age 21', howToApply:'Open account at Post Office or authorised bank branch', applyUrl:'https://www.indiapost.gov.in/Financial/pages/content/sukanya.aspx', tag:'Central',
+    matchOcc:['farmer','homemaker','labour','unemployed','business','government','other'], matchIncome:['below1L','1L-2.5L','2.5L-5L','5L-10L','above10L','unknown'], matchGender:['female'], matchAge:['below18'], minScore:50 },
+  { id:16, name:'Ladki Bahin Yojana (MH)', category:'women', icon:'👩', iconBg:'#FCE4EC', catColor:'#C62828', catBg:'#FCE4EC', eligibility:'Married women 21–60 yrs, Maharashtra resident, income below ₹2.5L/yr', documents:'Aadhaar, Ration card, Bank passbook, Domicile certificate', benefits:'₹1,500/month direct bank transfer', howToApply:'Apply via Nari Shakti Doot app or nearest Aaple Sarkar Seva Kendra', applyUrl:'https://ladakibahin.maharashtra.gov.in', tag:'Maharashtra',
+    matchOcc:['homemaker','farmer','labour','unemployed','other'], matchIncome:['below1L','1L-2.5L'], matchGender:['female'], matchAge:['18-25','26-40','41-60'], matchState:['maharashtra'], minScore:75 },
+  { id:17, name:'Rythu Bharosa (Andhra Pradesh)', category:'agriculture', icon:'🌾', iconBg:'#E8F5E9', catColor:'#2E7D32', catBg:'#E8F5E9', eligibility:'All farmers and agricultural labourers in Andhra Pradesh', documents:'Aadhaar, Passbook, Land records / Labour card', benefits:'₹13,500/year to farmers + ₹7,500 to landless farm labourers', howToApply:'Registered automatically via Aadhaar-linked farmer database', applyUrl:'https://apagrisnet.gov.in', tag:'Andhra Pradesh',
+    matchOcc:['farmer','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], matchState:['andhra'], minScore:75 },
+  { id:18, name:'Yuva Nidhi Scheme (Karnataka)', category:'employment', icon:'🎓', iconBg:'#F3E5F5', catColor:'#6A1B9A', catBg:'#F3E5F5', eligibility:'Unemployed graduates/diploma holders in Karnataka, age below 25', documents:'Degree/Diploma certificate, Aadhaar, Bank account, Ration card', benefits:'₹3,000/month (graduates) or ₹1,500/month (diploma) for 2 years', howToApply:'Apply on Seva Sindhu portal with required certificates', applyUrl:'https://sevasindhu.karnataka.gov.in', tag:'Karnataka',
+    matchOcc:['unemployed','student'], matchIncome:['below1L','1L-2.5L','unknown'], matchGender:['male','female','other'], matchAge:['18-25'], matchState:['karnataka'], minScore:70 },
+  { id:19, name:'Kalia Yojana (Odisha)', category:'agriculture', icon:'🌿', iconBg:'#E8F5E9', catColor:'#2E7D32', catBg:'#E8F5E9', eligibility:'Small/marginal farmers and landless agricultural labourers in Odisha', documents:'Aadhaar, Bank passbook, Land records', benefits:'₹10,000/year to farmers + ₹12,500 to landless labourers', howToApply:'Register on Kalia portal or visit nearest e-Seva centre', applyUrl:'https://kalia.odisha.gov.in', tag:'Odisha',
+    matchOcc:['farmer','labour'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['18-25','26-40','41-60'], matchState:['odisha'], minScore:75 },
+  { id:20, name:'CMCHIS Health Scheme (Tamil Nadu)', category:'health', icon:'🏥', iconBg:'#E3F2FD', catColor:'#1565C0', catBg:'#E3F2FD', eligibility:'TN residents, especially families with annual income below ₹72,000', documents:'Ration card, Aadhaar, Income certificate', benefits:'Free treatment up to ₹5 lakh at empanelled hospitals', howToApply:'Enrol at nearest government hospital in Tamil Nadu', applyUrl:'https://www.tnhealth.tn.gov.in', tag:'Tamil Nadu',
+    matchOcc:['farmer','labour','homemaker','unemployed','other'], matchIncome:['below1L','1L-2.5L'], matchGender:['male','female','other'], matchAge:['below18','18-25','26-40','41-60','above60'], matchState:['tamilnadu'], minScore:70 },
+  { id:21, name:'Kanyashree Prakalpa (West Bengal)', category:'women', icon:'👧', iconBg:'#FCE4EC', catColor:'#C62828', catBg:'#FCE4EC', eligibility:'Unmarried girls aged 13–18 studying in WB schools', documents:'School enrollment, Aadhaar, Bank account, Age proof', benefits:'₹1,000/year (K1) and ₹25,000 one-time grant (K2 at 18)', howToApply:'Apply through school or local Kanyashree office', applyUrl:'https://wbkanyashree.gov.in', tag:'West Bengal',
+    matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['female'], matchAge:['below18'], matchState:['westbengal'], minScore:70 },
+  { id:22, name:'Jai Bhim Mukhyamantri Pratibha Vikas (Delhi)', category:'education', icon:'📚', iconBg:'#FFF3E0', catColor:'#E65100', catBg:'#FFF3E0', eligibility:'SC/ST students passing 10th or 12th from Delhi schools', documents:'Mark sheet, Caste certificate, Aadhaar, Income certificate', benefits:'Free coaching for IIT/Medical/Civil Services entrance exams', howToApply:'Apply through Delhi SC/ST welfare department or coaching institute', applyUrl:'https://scstwelfare.delhi.gov.in', tag:'Delhi',
+    matchOcc:['student'], matchIncome:['below1L','1L-2.5L','2.5L-5L','unknown'], matchGender:['male','female','other'], matchAge:['below18','18-25'], matchState:['delhi'], minScore:65 }
+];
+
+// Profile data object
+let profileData = { age: '', gender: '', state: '', occupation: '', income: '' };
+let currentStep = 1;
+let allResults = [];
+
+function selectOption(field, value, el) {
+  profileData[field] = value;
+  const grid = el.closest('.option-grid');
+  grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function nextStep(step) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  // Update dots
+  document.getElementById('dot' + currentStep).classList.remove('active');
+  document.getElementById('dot' + currentStep).classList.add('done');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  document.getElementById('dot' + currentStep).classList.add('active');
+  // Sync state from select
+  if (step === 4) {
+    const stateEl = document.getElementById('finderState');
+    if (stateEl) profileData.state = stateEl.value;
+  }
+}
+
+function prevStep(step) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  document.getElementById('dot' + currentStep).classList.remove('active');
+  document.getElementById('dot' + currentStep).classList.remove('done');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  document.getElementById('dot' + currentStep).classList.add('active');
+  document.getElementById('dot' + currentStep).classList.remove('done');
+}
+
+// ─── ELIGIBILITY SCORE CALCULATOR ───
+function calculateScore(scheme, profile) {
+  let score = 0;
+  let maxScore = 0;
+
+  // Occupation match (30 pts)
+  maxScore += 30;
+  if (scheme.matchOcc && profile.occupation) {
+    if (scheme.matchOcc.includes(profile.occupation)) score += 30;
+    else if (scheme.matchOcc.includes('other')) score += 15;
+  } else score += 20;
+
+  // Income match (25 pts)
+  maxScore += 25;
+  if (scheme.matchIncome && profile.income) {
+    if (scheme.matchIncome.includes(profile.income)) score += 25;
+    else if (scheme.matchIncome.includes('unknown')) score += 15;
+  } else score += 18;
+
+  // Gender match (20 pts)
+  maxScore += 20;
+  if (scheme.matchGender && profile.gender) {
+    if (scheme.matchGender.includes(profile.gender)) score += 20;
+  } else score += 15;
+
+  // Age match (15 pts)
+  maxScore += 15;
+  if (scheme.matchAge && profile.age) {
+    if (scheme.matchAge.includes(profile.age)) score += 15;
+    else if (scheme.matchAge.includes('any')) score += 10;
+  } else score += 10;
+
+  // State match bonus (10 pts)
+  maxScore += 10;
+  if (scheme.matchState) {
+    if (profile.state && scheme.matchState.includes(profile.state)) score += 10;
+    else score += 0; // state specific, no bonus without match
+  } else {
+    score += 10; // Central scheme, applicable everywhere
+  }
+
+  return Math.min(Math.round((score / maxScore) * 100), 97);
+}
+
+function getScoreTier(score) {
+  if (score >= 80) return 'high';
+  if (score >= 50) return 'mid';
+  return 'low';
+}
+
+function getScoreLabel(score) {
+  if (score >= 80) return { label: 'Highly Eligible', class: 'badge-high', color: '#2E7D32' };
+  if (score >= 50) return { label: 'Moderately Eligible', class: 'badge-mid', color: '#E65100' };
+  return { label: 'Low Eligibility', class: 'badge-low', color: '#C62828' };
+}
+
+function buildApplySteps(howToApply) {
+  // Split howToApply text into numbered steps
+  const raw = howToApply;
+  const sentences = raw.split(/\.|,|;/).filter(s => s.trim().length > 5);
+  if (sentences.length <= 1) {
+    return `<li>${raw}</li>`;
+  }
+  return sentences.map(s => `<li>${s.trim()}</li>`).join('');
+}
+
+function findSchemes() {
+  // Sync state value
+  const stateEl = document.getElementById('finderState');
+  if (stateEl) profileData.state = stateEl.value;
+
+  // Score and sort schemes
+  const scored = schemes.map(s => ({
+    ...s,
+    score: calculateScore(s, profileData)
+  })).sort((a, b) => b.score - a.score);
+
+  allResults = scored;
+
+  // Build summary badges
+  const badges = [];
+  if (profileData.age) badges.push(`🎂 ${profileData.age}`);
+  if (profileData.gender) badges.push(`👤 ${profileData.gender}`);
+  if (profileData.state) badges.push(`📍 ${profileData.state}`);
+  if (profileData.occupation) badges.push(`💼 ${profileData.occupation}`);
+  if (profileData.income) badges.push(`💰 ${profileData.income}`);
+
+  document.getElementById('resultsSummaryBadges').innerHTML = badges.map(b =>
+    `<span style="padding:5px 14px;background:var(--sky);border-radius:100px;font-size:0.78rem;font-weight:700;color:var(--blue);">${b}</span>`
+  ).join('');
+
+  // Save profile to localStorage for Form Assistant
+  try {
+    localStorage.setItem('jansahay_finder_profile', JSON.stringify(profileData));
+  } catch(e) {}
+
+  // Hide form, show results
+  document.getElementById('finderFormCard').style.display = 'none';
+  document.getElementById('resultsSection').style.display = 'block';
+
+  renderResults(allResults);
+
+  // Scroll to results
+  document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+function renderResults(data) {
+  const grid = document.getElementById('resultsGrid');
+  if (!data.length) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--gray-600);">No schemes found for your profile. Try adjusting your inputs.</div>';
+    return;
+  }
+
+  grid.innerHTML = data.map(s => {
+    const tier = getScoreTier(s.score);
+    const scoreInfo = getScoreLabel(s.score);
+    const fillClass = `score-${tier}`;
+    const saved = isSaved(s.id);
+    const steps = buildApplySteps(s.howToApply);
+
+    return `
+    <div class="result-card" data-tier="${tier}">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;">
+        <div style="width:48px;height:48px;border-radius:12px;background:${s.iconBg};display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">${s.icon}</div>
+        <div style="flex:1;">
+          <div style="font-family:'Baloo 2',cursive;font-size:1rem;font-weight:700;color:var(--navy);">${s.name}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+            <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;background:${s.iconBg};color:${s.catColor};">${s.category.charAt(0).toUpperCase()+s.category.slice(1)}</span>
+            <span style="font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:100px;background:${s.tag==='Central'?'#E3F2FD':'#FFF3E0'};color:${s.tag==='Central'?'#1565C0':'#E65100'};">${s.tag}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <span class="score-badge ${scoreInfo.class}">${s.score}% ${scoreInfo.label}</span>
+        </div>
+      </div>
+
+      <!-- Score Bar -->
+      <div class="score-bar">
+        <div class="score-fill ${fillClass}" style="width:${s.score}%;"></div>
+      </div>
+
+      <!-- Details -->
+      <div style="margin-top:14px;display:grid;gap:8px;">
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:0.82rem;">
+          <span style="font-weight:700;color:var(--gray-400);min-width:72px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.04em;margin-top:1px;">Benefits</span>
+          <span style="color:var(--gray-800);line-height:1.5;">${s.benefits}</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:0.82rem;">
+          <span style="font-weight:700;color:var(--gray-400);min-width:72px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.04em;margin-top:1px;">Eligible</span>
+          <span style="color:var(--gray-800);line-height:1.5;">${s.eligibility}</span>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;font-size:0.82rem;">
+          <span style="font-weight:700;color:var(--gray-400);min-width:72px;text-transform:uppercase;font-size:0.7rem;letter-spacing:0.04em;margin-top:1px;">Docs</span>
+          <span style="color:var(--gray-800);line-height:1.5;">${s.documents}</span>
+        </div>
+      </div>
+
+      <!-- Step-by-step guide -->
+      <details style="margin-top:14px;">
+        <summary style="cursor:pointer;font-size:0.82rem;font-weight:700;color:var(--blue);padding:8px;background:var(--sky);border-radius:8px;outline:none;">📋 How to Apply — Step by Step</summary>
+        <ul class="step-guide-list" style="margin-top:10px;">${steps}</ul>
+      </details>
+
+      <!-- Actions -->
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+        <a href="${s.applyUrl}" target="_blank" rel="noopener"
+          style="flex:1;min-width:140px;padding:10px;text-align:center;background:linear-gradient(135deg,var(--blue),#1976D2);color:white;border-radius:10px;font-family:'Baloo 2',cursive;font-size:0.85rem;font-weight:700;text-decoration:none;">🔗 Apply Now ↗</a>
+        <button onclick="toggleSaveScheme(${s.id},'${s.name}','${s.icon}','${s.applyUrl}',this)"
+          class="save-btn-result ${saved ? 'saved' : ''}" id="saveBtn${s.id}">
+          ${saved ? '⭐ Saved' : '☆ Save'}
+        </button>
+        <button onclick="addToCompare(${s.id})"
+          style="padding:10px 14px;background:var(--mint);border:1.5px solid var(--green-light);border-radius:10px;font-size:0.75rem;font-weight:700;cursor:pointer;color:var(--green);">⚖️ Compare</button>
+        <a href="form-assistant.html?scheme=${s.id}"
+          style="padding:10px 14px;background:#FFF3E0;border:1.5px solid #FFE0B2;border-radius:10px;font-size:0.75rem;font-weight:700;cursor:pointer;color:#E65100;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">📝 Fill Form</a>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  // Animate score bars
+  setTimeout(() => {
+    document.querySelectorAll('.score-fill').forEach(el => {
+      el.style.transition = 'width 1s ease';
+    });
+  }, 100);
+}
+
+function filterResults(tier, btn) {
+  document.querySelectorAll('#resultsSection .scheme-tab').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = 'white';
+    b.style.color = 'var(--gray-600)';
+    b.style.borderColor = '#E2E8F0';
+  });
+  btn.classList.add('active');
+  btn.style.background = 'var(--blue)';
+  btn.style.color = 'white';
+  btn.style.borderColor = 'var(--blue)';
+
+  if (tier === 'all') renderResults(allResults);
+  else renderResults(allResults.filter(s => getScoreTier(s.score) === tier));
+}
+
+function resetFinder() {
+  profileData = { age: '', gender: '', state: '', occupation: '', income: '' };
+  currentStep = 1;
+  // Reset dots
+  for (let i = 1; i <= 5; i++) {
+    const d = document.getElementById('dot' + i);
+    d.classList.remove('active', 'done');
+  }
+  document.getElementById('dot1').classList.add('active');
+  // Reset steps
+  document.querySelectorAll('.finder-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step1').classList.add('active');
+  // Reset option buttons
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  // Reset state select
+  const stateEl = document.getElementById('finderState');
+  if (stateEl) stateEl.value = '';
+
+  document.getElementById('finderFormCard').style.display = 'block';
+  document.getElementById('resultsSection').style.display = 'none';
+  document.getElementById('finderFormCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─── SAVE SCHEME (localStorage) ───
+function isSaved(id) {
+  const saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  return saved.some(s => s.id === id);
+}
+
+function toggleSaveScheme(id, name, icon, url, btn) {
+  let saved = JSON.parse(localStorage.getItem('jansahay_saved') || '[]');
+  const idx = saved.findIndex(s => s.id === id);
+  if (idx === -1) {
+    saved.push({ id, name, icon, url, status: 'pending' });
+    btn.textContent = '⭐ Saved';
+    btn.classList.add('saved');
+    showToast('✅ Scheme saved to your Dashboard!');
+  } else {
+    saved.splice(idx, 1);
+    btn.textContent = '☆ Save';
+    btn.classList.remove('saved');
+    showToast('🗑️ Scheme removed from saved list.');
+  }
+  localStorage.setItem('jansahay_saved', JSON.stringify(saved));
+}
+
+let compareList = JSON.parse(localStorage.getItem('jansahay_compare') || '[]');
+
+function addToCompare(id) {
+  if (compareList.includes(id)) {
+    showToast('Already in compare list!');
+    return;
+  }
+  if (compareList.length >= 3) {
+    showToast('⚠️ Max 3 schemes for comparison. Clear first.');
+    return;
+  }
+  compareList.push(id);
+  localStorage.setItem('jansahay_compare', JSON.stringify(compareList));
+  showToast(`✅ Added to compare (${compareList.length}/3). Go to index to compare.`);
+}
+
+function showToast(msg) {
+  let t = document.getElementById('jsToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'jsToast';
+    t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0A2342;color:white;padding:12px 24px;border-radius:12px;font-family:"Baloo 2",cursive;font-size:0.9rem;font-weight:600;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.3);transition:opacity 0.3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.style.opacity = '0'; }, 3000);
+}
+
+// Auth
+document.addEventListener('DOMContentLoaded', function() {
+  const authBtn = document.getElementById('authBtn');
+  const authDropdown = document.getElementById('authDropdown');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loggedInUser = localStorage.getItem('loggedInUser');
+  if (authBtn && loggedInUser) {
+    const userData = JSON.parse(loggedInUser) || {};
+    const name = typeof loggedInUser === 'string' && loggedInUser.startsWith('{') ? (userData.displayName || 'User') : loggedInUser;
+    authBtn.textContent = name.split(' ')[0] + ' ▼';
+    authBtn.href = '#';
+    authBtn.addEventListener('click', e => { e.preventDefault(); authDropdown.classList.toggle('hidden'); });
+    if (logoutBtn) logoutBtn.addEventListener('click', () => { localStorage.removeItem('loggedInUser'); window.location.reload(); });
+  }
+});
+</script>
+</body>
+</html>
