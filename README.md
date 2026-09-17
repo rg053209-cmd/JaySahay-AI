@@ -4,10 +4,6 @@
 
 JanSahay AI is an AI-powered web application designed to simplify access to government schemes for Indian citizens. It enables users to discover, understand, and apply for welfare schemes through an intuitive interface, multilingual support, and smart assistance features.
 
-👥 Team Members This project is developed collaboratively by: 👩‍💻 Hansa Gusaiwal 👩‍💻 Roshni Gupta 👨‍💻 Prince Savaniya 👩‍💻 Tanushree Pabale
-
-👨‍💻 Team Roles Hansa Gusaiwal – Firebase Authentication & Data Handling Roshni Gupta – Frontend Development & UI/UX Design Prince Savaniya – Backend & Server Integration Tanushree Pabale – Testing, Documentation & Research
-
 ✨ Key Features 💬 AI Chat Assistant Provides instant responses about government schemes Simple and user-friendly interaction
 
 🌐 Multi-Language Support Supports multiple Indian languages Improves accessibility for diverse users
